@@ -36,6 +36,7 @@ def set_session_cookie(response, user_id: int) -> None:
         key="session",
         value=signed,
         max_age=SESSION_MAX_AGE,
+        path="/",
         httponly=True,
         samesite="lax",
         secure=False,  # set True behind TLS proxy
@@ -43,7 +44,7 @@ def set_session_cookie(response, user_id: int) -> None:
 
 
 def clear_session_cookie(response) -> None:
-    response.delete_cookie(key="session")
+    response.delete_cookie(key="session", path="/")
 
 
 async def current_user(request: Request):
