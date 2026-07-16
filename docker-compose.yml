@@ -3,7 +3,7 @@ services:
     build: .
     container_name: kash
     ports:
-      - "8200:8200"
+      - "8400:8400"
     environment:
       - TZ=America/Caracas
       - DB_HOST=postgres_central
