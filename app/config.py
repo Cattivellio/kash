@@ -18,7 +18,7 @@ SESSION_MAX_AGE = int(os.environ.get("SESSION_MAX_AGE", str(86400 * 365)))  # 1 
 TZ = os.environ.get("TZ", "America/Caracas")
 
 KASH_HOST = os.environ.get("KASH_HOST", "0.0.0.0")
-KASH_PORT = int(os.environ.get("KASH_PORT", "8400"))
+KASH_PORT = int(os.environ.get("KASH_PORT", "8450"))
 
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("DB_PORT", "5432"))

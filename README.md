@@ -31,7 +31,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8200 --reload
 docker compose up -d
 ```
 
-Joins the `postgree_red_central_db` network. Port `8200`.
+Joins the `postgree_red_central_db` network. Port `8450`.
 
 ## Features
 
@@ -61,5 +61,5 @@ Joins the `postgree_red_central_db` network. Port `8200`.
 | `SESSION_SECRET` | `dev-secret-change-me` | Cookie signing secret |
 | `SESSION_MAX_AGE` | `31536000` (1 year) | Session cookie lifetime |
 | `KASH_HOST` | `0.0.0.0` | Bind host |
-| `KASH_PORT` | `8200` | Bind port |
+| `KASH_PORT` | `8450` | Bind port |
 | `TZ` | `America/Caracas` | Timezone |
