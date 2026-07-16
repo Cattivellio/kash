@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#f8f8f8" />
+  <title>Kash</title>
+  <link rel="stylesheet" href="/static/css/tokens.css" />
+  <link rel="stylesheet" href="/static/css/glass.css" />
+  <link rel="stylesheet" href="/static/css/app.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+  <div class="mesh-bg"></div>
+  <div class="onboarding-wrap">
+    <div class="glass onboarding-card">
+      <div class="brand-lg">K</div>
+      <h1>{{ strings.onboarding_title }}</h1>
+      <p>{{ strings.onboarding_subtitle }}</p>
+
+      <div class="locale-picker">
+        <button type="button" class="locale-btn active" data-locale="es" onclick="setLocale('es')">ES</button>
+        <button type="button" class="locale-btn" data-locale="en" onclick="setLocale('en')">EN</button>
+      </div>
+
+      <form method="POST" action="/onboarding" id="onboarding-form">
+        <input type="hidden" name="locale" id="locale-field" value="{{ locale }}" />
+        <div class="form-group">
+          <input
+            class="form-input"
+            type="text"
+            name="name"
+            placeholder="{{ strings.onboarding_name_placeholder }}"
+            required
+            autocomplete="given-name"
+            autofocus
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">{{ strings.onboarding_button }}</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function setLocale(loc) {
+      document.querySelectorAll('.locale-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.locale === loc);
+      });
+      document.getElementById('locale-field').value = loc;
+    }
+  </script>
+</body>
+</html>

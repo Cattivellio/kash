@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="page-title">{{ t('month_' + month | string) }} {{ year }}</h1>
+<p class="page-subtitle">{{ user.name }}</p>
+
+<div class="summary-row">
+  <div class="glass glass-pill income">
+    <span class="pill-label">{{ t('dashboard_income') }}</span>
+    <span class="pill-value">{{ t('currency_symbol') }}{{ '%.2f' | format(summary.income) }}</span>
+  </div>
+  <div class="glass glass-pill expense">
+    <span class="pill-label">{{ t('dashboard_expense') }}</span>
+    <span class="pill-value">{{ t('currency_symbol') }}{{ '%.2f' | format(summary.expense) }}</span>
+  </div>
+  <div class="glass glass-pill balance">
+    <span class="pill-label">{{ t('dashboard_balance') }}</span>
+    <span class="pill-value">{{ t('currency_symbol') }}{{ '%.2f' | format(summary.balance) }}</span>
+  </div>
+</div>
+
+<div class="section-title">{{ t('dashboard_recent') }}</div>
+
+{% if recent %}
+<div class="record-list">
+  {% for r in recent %}
+  <div class="record-row">
+    <div class="record-row-content">
+      <div class="record-left">
+        <div class="record-icon {{ r.kind }}">
+          {% if r.kind == 'income' %}↑{% else %}↓{% endif %}
+        </div>
+        <div class="record-info">
+          <span class="record-name">{{ r.name }}</span>
+          <span class="record-meta">{{ r.occurred_at[:10] }} · {{ t('method_' + r.payment_method) }}</span>
+        </div>
+      </div>
+      <div class="record-right">
+        <span class="record-amount {{ r.kind }}">
+          {% if r.kind == 'income' %}+{% else %}-{% endif %}{{ t('currency_symbol') }}{{ '%.2f' | format(r.amount) }}
+        </span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state glass">
+  <h3>{{ t('dashboard_empty') }}</h3>
+  <p>{{ t('app_tagline') }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

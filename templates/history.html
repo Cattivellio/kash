@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="page-title">{{ t('history_title') }}</h1>
+<p class="page-subtitle">{{ records | length }} {{ t('history_count', n=records | length) }}</p>
+
+<form method="GET" action="/history" class="filter-bar glass">
+  <div class="form-group" style="margin-bottom:0;">
+    <label class="form-label">{{ t('history_filter_kind') }}</label>
+    <select class="form-select" name="kind">
+      <option value="all" {{ 'selected' if filter_kind == 'all' }}>{{ t('history_filter_all') }}</option>
+      <option value="income" {{ 'selected' if filter_kind == 'income' }}>{{ t('kind_income') }}</option>
+      <option value="expense" {{ 'selected' if filter_kind == 'expense' }}>{{ t('kind_expense') }}</option>
+    </select>
+  </div>
+  <div class="form-group" style="margin-bottom:0;">
+    <label class="form-label">{{ t('history_filter_from') }}</label>
+    <input class="form-input" type="date" name="from_date" value="{{ filter_from }}" />
+  </div>
+  <div class="form-group" style="margin-bottom:0;">
+    <label class="form-label">{{ t('history_filter_to') }}</label>
+    <input class="form-input" type="date" name="to_date" value="{{ filter_to }}" />
+  </div>
+  <div class="form-group" style="margin-bottom:0;">
+    <label class="form-label">{{ t('history_filter_method') }}</label>
+    <select class="form-select" name="method">
+      <option value="all" {{ 'selected' if filter_method == 'all' }}>{{ t('history_filter_all') }}</option>
+      <option value="cash" {{ 'selected' if filter_method == 'cash' }}>{{ t('method_cash') }}</option>
+      <option value="card" {{ 'selected' if filter_method == 'card' }}>{{ t('method_card') }}</option>
+      <option value="zelle" {{ 'selected' if filter_method == 'zelle' }}>{{ t('method_zelle') }}</option>
+    </select>
+  </div>
+  <div class="filter-actions">
+    <button type="submit" class="btn btn-primary" style="flex:2;">{{ t('history_apply') }}</button>
+    <a href="/history" class="btn btn-ghost" style="flex:1;">{{ t('history_clear') }}</a>
+  </div>
+</form>
+
+{% if records %}
+<div class="record-list" style="margin-top:16px;">
+  {% for r in records %}
+  <div class="record-row" data-id="{{ r.id }}">
+    <div class="record-row-content">
+      <div class="record-left">
+        <div class="record-icon {{ r.kind }}">
+          {% if r.kind == 'income' %}↑{% else %}↓{% endif %}
+        </div>
+        <div class="record-info">
+          <span class="record-name">{{ r.name }}</span>
+          <span class="record-meta">{{ r.occurred_at[:16] | replace('T', ' ') }} · {{ t('method_' + r.payment_method) }}</span>
+          {% if r.note %}<span class="record-meta">{{ r.note }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="record-right">
+        <span class="record-amount {{ r.kind }}">
+          {% if r.kind == 'income' %}+{% else %}-{% endif %}{{ t('currency_symbol') }}{{ '%.2f' | format(r.amount) }}
+        </span>
+        <div style="display:flex;gap:4px;justify-content:flex-end;margin-top:2px;">
+          <button class="btn-ghost" style="font-size:0.7rem;padding:2px 6px;border:1px solid var(--border);border-radius:6px;background:var(--card);" onclick="openEdit({{ r.id }}, '{{ r.kind }}', {{ r.amount | tojson }}, '{{ r.name | e }}', '{{ r.occurred_at }}', '{{ r.payment_method }}', '{{ (r.note or '') | e }}')">{{ t('action_edit') }}</button>
+          <form method="POST" action="/records/{{ r.id }}/delete" style="display:inline;" onsubmit="return confirm('{{ t('action_confirm_delete') }}')">
+            <button type="submit" class="btn-ghost" style="font-size:0.7rem;padding:2px 6px;border:1px solid var(--neg);border-radius:6px;color:var(--neg);background:var(--card);">{{ t('action_delete') }}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state glass" style="margin-top:16px;">
+  <h3>{{ t('history_empty') }}</h3>
+</div>
+{% endif %}
+
+<!-- Edit sheet -->
+<div class="sheet-overlay" id="edit-overlay"></div>
+<div class="sheet" id="edit-sheet">
+  <div class="sheet-handle"></div>
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;">{{ t('action_edit') }}</h2>
+  <form method="POST" id="edit-form" action="">
+    <input type="hidden" name="kind" id="edit-kind" />
+    <div class="form-group">
+      <label class="form-label" for="edit-name">{{ t('form_name') }}</label>
+      <input class="form-input" type="text" id="edit-name" name="name" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="edit-amount">{{ t('form_amount') }}</label>
+      <input class="form-input" type="number" id="edit-amount" name="amount" step="0.01" min="0.01" required />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="edit-date">{{ t('form_date') }}</label>
+        <input class="form-input" type="date" id="edit-date" name="occurred_at_date" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-time">{{ t('form_time') }}</label>
+        <input class="form-input" type="time" id="edit-time" name="occurred_at_time" required />
+      </div>
+    </div>
+    <input type="hidden" name="occurred_at" id="edit-datetime" />
+    <div class="form-group">
+      <label class="form-label">{{ t('form_method') }}</label>
+      <div class="method-pills">
+        <button type="button" class="method-pill" data-method="cash" onclick="selectMethod(this)">{{ t('method_cash') }}</button>
+        <button type="button" class="method-pill" data-method="card" onclick="selectMethod(this)">{{ t('method_card') }}</button>
+        <button type="button" class="method-pill" data-method="zelle" onclick="selectMethod(this)">{{ t('method_zelle') }}</button>
+      </div>
+      <input type="hidden" name="payment_method" id="edit-method" value="cash" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="edit-note">{{ t('form_note') }}</label>
+      <textarea class="form-textarea" id="edit-note" name="note"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="submit" class="btn btn-primary" style="flex:2;">{{ t('form_submit_save') }}</button>
+      <button type="button" class="btn btn-ghost" style="flex:1;" onclick="closeEdit()">{{ t('form_cancel') }}</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function openEdit(id, kind, amount, name, occurredAt, method, note) {
+    document.getElementById('edit-form').action = '/records/' + id + '/edit';
+    document.getElementById('edit-kind').value = kind;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-amount').value = amount;
+    if (occurredAt) {
+      document.getElementById('edit-date').value = occurredAt.slice(0, 10);
+      document.getElementById('edit-time').value = occurredAt.slice(11, 16);
+    }
+    document.getElementById('edit-method').value = method;
+    document.getElementById('edit-note').value = note || '';
+    document.querySelectorAll('#edit-sheet .method-pill').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.method === method);
+    });
+    document.getElementById('edit-overlay').classList.add('open');
+    document.getElementById('edit-sheet').classList.add('open');
+  }
+  function closeEdit() {
+    document.getElementById('edit-overlay').classList.remove('open');
+    document.getElementById('edit-sheet').classList.remove('open');
+  }
+  document.getElementById('edit-overlay').addEventListener('click', closeEdit);
+</script>
+
+{% endblock %}

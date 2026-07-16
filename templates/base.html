@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}" data-theme="{{ theme }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#f8f8f8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f0f13" media="(prefers-color-scheme: dark)" />
+  <title>Kash</title>
+  <link rel="stylesheet" href="/static/css/tokens.css" />
+  <link rel="stylesheet" href="/static/css/glass.css" />
+  <link rel="stylesheet" href="/static/css/app.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+  <div class="mesh-bg"></div>
+  <div class="app">
+    {% block header %}
+    <header class="app-header">
+      <div class="header-inner">
+        <a href="/" class="brand">
+          <span class="brand-mark">K</span>
+          <span>Kash</span>
+        </a>
+        <div class="header-actions">
+          <button id="theme-toggle" class="btn-icon" type="button" aria-label="{{ strings.theme_toggle | default('Theme') }}">
+            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg id="theme-icon-dark" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          {% if user %}
+          <button id="locale-toggle" class="btn-icon" type="button" style="font-size:0.75rem;font-weight:600;width:auto;padding:0 8px;">
+            {{ locale | upper }}
+          </button>
+          <a href="/signout" class="btn-icon" aria-label="{{ strings.sign_out }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    {% endblock %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    {% if user and active is defined %}
+    <nav class="tab-bar" aria-label="{{ strings.nav_dashboard }}">
+      <div class="tab-bar-inner">
+        <a href="/dashboard" class="tab-item {{ 'active' if active == 'dashboard' else '' }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>{{ strings.nav_dashboard }}</span>
+        </a>
+        <a href="/income" class="tab-item {{ 'active' if active == 'income' else '' }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          <span>{{ strings.nav_income }}</span>
+        </a>
+        <a href="/expenses" class="tab-item {{ 'active' if active == 'expenses' else '' }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          <span>{{ strings.nav_expenses }}</span>
+        </a>
+        <a href="/history" class="tab-item {{ 'active' if active == 'history' else '' }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>{{ strings.nav_history }}</span>
+        </a>
+      </div>
+    </nav>
+    {% endif %}
+
+    <footer class="app-footer">
+      {{ strings.footer_text }}
+    </footer>
+  </div>
+
+  <script>
+    window.KASH = {
+      locale: {{ locale | tojson }},
+      strings: {{ strings | tojson }},
+      user: {{ user | tojson if user else 'null' }},
+      theme: {{ theme | tojson }}
+    };
+  </script>
+</body>
+</html>
