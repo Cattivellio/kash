@@ -67,8 +67,9 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
 
-def _ctx(request: Request, user: dict | None = None, **extra):
-    locale = user["locale"] if user else "es"
+def _ctx(request: Request, user: dict | None = None, locale: str = "es", **extra):
+    if user:
+        locale = user["locale"]
     base = {
         "request": request,
         "locale": locale,
@@ -124,17 +125,19 @@ async def index(request: Request):
 
 
 @app.get("/onboarding", response_class=HTMLResponse)
-async def onboarding_page(request: Request):
+async def onboarding_page(request: Request, locale: str = Query("es")):
     user = _require_user(request)
     if user is not None:
         return RedirectResponse(url="/dashboard", status_code=303)
+    if locale not in SUPPORTED_LOCALES:
+        locale = "es"
     return templates.TemplateResponse(
         "onboarding.html",
-        _ctx(request, strings=STRINGS["es"]),
+        _ctx(request, strings=STRINGS[locale], locale=locale),
     )
 
 
-@app.post("/onboarding", response_class=HTMLResponse)
+@app.post("/onboarding")
 async def onboarding_post(
     request: Request,
     name: str = Form(...),

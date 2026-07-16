@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="{{ locale }}" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -21,8 +21,8 @@
       <p>{{ strings.onboarding_subtitle }}</p>
 
       <div class="locale-picker">
-        <button type="button" class="locale-btn active" data-locale="es" onclick="setLocale('es')">ES</button>
-        <button type="button" class="locale-btn" data-locale="en" onclick="setLocale('en')">EN</button>
+        <button type="button" class="locale-btn {{ 'active' if locale == 'es' else '' }}" data-locale="es" onclick="setLocale('es')">ES</button>
+        <button type="button" class="locale-btn {{ 'active' if locale == 'en' else '' }}" data-locale="en" onclick="setLocale('en')">EN</button>
       </div>
 
       <form method="POST" action="/onboarding" id="onboarding-form">
@@ -49,6 +49,7 @@
         b.classList.toggle('active', b.dataset.locale === loc);
       });
       document.getElementById('locale-field').value = loc;
+      window.location.href = '/onboarding?locale=' + loc;
     }
   </script>
 </body>
